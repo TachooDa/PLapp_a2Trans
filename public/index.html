@@ -1,0 +1,1366 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>A2 Trans — Generator Surat Penawaran</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              navy: { DEFAULT: "#1e3a5f", light: "#2e5481", muted: "#e8edf3" },
+              gold: { DEFAULT: "#c8a84b", light: "#f0e0a0" },
+            },
+            fontFamily: { sans: ["Inter", "Arial", "sans-serif"] },
+          },
+        },
+      };
+    </script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      .field-input {
+        width: 100%;
+        border-radius: 8px;
+        border: 1.5px solid #e2e8f0;
+        background: #fff;
+        padding: 9px 12px;
+        font-size: 14px;
+        color: #1a202c;
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s;
+        outline: none;
+      }
+      .field-input:focus {
+        border-color: #1e3a5f;
+        box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
+      }
+      .field-input::placeholder {
+        color: #a0aec0;
+      }
+      .field-input.error {
+        border-color: #fc8181;
+      }
+      select.field-input {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        padding-right: 32px;
+      }
+      .field-label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        color: #4a5568;
+        margin-bottom: 5px;
+        letter-spacing: 0.03em;
+      }
+      .field-label .req {
+        color: #e53e3e;
+        margin-left: 2px;
+      }
+      .field-label .opt {
+        color: #a0aec0;
+        font-weight: 400;
+        margin-left: 4px;
+      }
+      .section-card {
+        background: #fff;
+        border-radius: 14px;
+        border: 1.5px solid #e8edf3;
+        margin-bottom: 14px;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(30, 58, 95, 0.05);
+      }
+      .section-head {
+        padding: 13px 18px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        user-select: none;
+      }
+      .section-head .icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        flex-shrink: 0;
+      }
+      .section-head .title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #1e3a5f;
+        letter-spacing: 0.02em;
+      }
+      .section-head .subtitle {
+        font-size: 11px;
+        color: #a0aec0;
+        font-weight: 400;
+        margin-top: 1px;
+      }
+      .section-body {
+        padding: 0 18px 16px;
+      }
+      .collapse-arrow {
+        margin-left: auto;
+        color: #a0aec0;
+        transition: transform 0.2s;
+        font-size: 12px;
+      }
+      .collapsed .collapse-arrow {
+        transform: rotate(-90deg);
+      }
+      .tab-btn {
+        padding: 7px 18px;
+        font-size: 13px;
+        font-weight: 600;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.15s;
+        border: none;
+      }
+      .tab-active {
+        background: #fff;
+        color: #1e3a5f;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+      }
+      .tab-inactive {
+        background: transparent;
+        color: rgba(255, 255, 255, 0.7);
+      }
+      .item-row td {
+        padding: 5px 4px;
+        vertical-align: middle;
+      }
+      .item-input {
+        width: 100%;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 6px 8px;
+        font-size: 13px;
+        outline: none;
+        background: #fff;
+      }
+      .item-input:focus {
+        border-color: #1e3a5f;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 3px 8px;
+        border-radius: 20px;
+      }
+      .tag-incl {
+        background: #f0fff4;
+        color: #276749;
+        border: 1px solid #9ae6b4;
+      }
+      .tag-excl {
+        background: #fff5f5;
+        color: #c53030;
+        border: 1px solid #feb2b2;
+      }
+      .hint {
+        font-size: 11px;
+        color: #a0aec0;
+        margin-top: 4px;
+      }
+      #logoPreview {
+        display: none;
+      }
+    </style>
+  </head>
+  <body
+    style="
+      background: #f0f4f8;
+      min-height: 100vh;
+      font-family: Inter, Arial, sans-serif;
+    "
+  >
+    <!-- TOP BAR -->
+    <header
+      style="
+        background: #1e3a5f;
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
+      "
+    >
+      <div
+        style="
+          max-width: 720px;
+          margin: 0 auto;
+          padding: 10px 16px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        "
+      >
+        <div style="display: flex; align-items: center; gap: 10px">
+          <div
+            style="
+              width: 36px;
+              height: 36px;
+              background: #c8a84b;
+              border-radius: 9px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-weight: 800;
+              font-size: 13px;
+              color: #1e3a5f;
+            "
+          >
+            A2
+          </div>
+          <div>
+            <div style="font-weight: 700; font-size: 14px; color: #fff">
+              A2 Trans
+            </div>
+            <div style="font-size: 11px; color: rgba(255, 255, 255, 0.6)">
+              Generator Surat Penawaran
+            </div>
+          </div>
+        </div>
+        <div
+          style="
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+            padding: 4px;
+            display: flex;
+            gap: 2px;
+          "
+        >
+          <button
+            class="tab-btn tab-active"
+            id="tab-form"
+            onclick="showTab('form')"
+          >
+            ✏️ Form
+          </button>
+          <button
+            class="tab-btn tab-inactive"
+            id="tab-history"
+            onclick="showTab('history')"
+          >
+            🕘 History
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main style="max-width: 720px; margin: 0 auto; padding: 20px 16px 48px">
+      <!-- ══════════════════ TAB FORM ══════════════════ -->
+      <div id="panel-form">
+        <!-- Intro banner -->
+        <div
+          style="
+            background: linear-gradient(135deg, #1e3a5f, #2e5481);
+            border-radius: 14px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+          "
+        >
+          <div style="font-size: 32px">📄</div>
+          <div>
+            <div style="font-weight: 700; font-size: 15px">
+              Buat Surat Penawaran Baru
+            </div>
+            <div
+              style="
+                font-size: 12px;
+                color: rgba(255, 255, 255, 0.7);
+                margin-top: 2px;
+              "
+            >
+              Isi form di bawah lalu klik <strong>Generate PDF</strong> — surat
+              langsung terdownload.
+            </div>
+          </div>
+        </div>
+
+        <form id="mainForm" onsubmit="submitForm(event)" novalidate>
+          <!-- ─── 1. LOGO ─────────────────────────────────────── -->
+          <!-- <div class="section-card">
+            <div class="section-head" onclick="toggleSection('sec-logo')">
+              <div class="icon" style="background: #fef9ec">🖼️</div>
+              <div>
+                <div class="title">Logo Perusahaan</div>
+                <div class="subtitle">Tampil di pojok kiri PDF</div>
+              </div>
+              <span class="collapse-arrow">▼</span>
+            </div>
+            <div class="section-body" id="sec-logo">
+              <div style="display: flex; align-items: center; gap: 14px">
+                <label
+                  for="logoInput"
+                  style="
+                    cursor: pointer;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    width: 90px;
+                    height: 70px;
+                    border: 2px dashed #cbd5e0;
+                    border-radius: 10px;
+                    background: #f7fafc;
+                    color: #a0aec0;
+                    font-size: 11px;
+                    font-weight: 600;
+                    gap: 4px;
+                    transition: border-color 0.15s;
+                  "
+                  onmouseover="this.style.borderColor = '#1e3a5f'"
+                  onmouseout="this.style.borderColor = '#cbd5e0'"
+                >
+                  <span style="font-size: 22px">＋</span>
+                  <span>Upload Logo</span>
+                  <input
+                    type="file"
+                    id="logoInput"
+                    accept="image/*"
+                    style="display: none"
+                    onchange="previewLogo(event)"
+                  />
+                </label>
+                <img
+                  id="logoPreview"
+                  style="
+                    height: 60px;
+                    max-width: 140px;
+                    object-fit: contain;
+                    border-radius: 8px;
+                    border: 1.5px solid #e2e8f0;
+                    padding: 4px;
+                  "
+                />
+                <div style="font-size: 12px; color: #718096; line-height: 1.6">
+                  Format PNG atau JPG<br />
+                  Ukuran ideal: <strong>300×100px</strong><br />
+                  <span id="logoFileName" style="color: #a0aec0"></span>
+                </div>
+              </div>
+              <input type="hidden" id="logoBase64" name="logoBase64" />
+            </div>
+          </div> -->
+
+          <!-- ─── 2. INFO PERUSAHAAN (collapsible) ────────────── -->
+          <div class="section-card collapsed" id="card-perusahaan">
+            <div
+              class="section-head"
+              onclick="toggleSection('sec-perusahaan', 'card-perusahaan')"
+            >
+              <div class="icon" style="background: #ebf4ff">🏢</div>
+              <div>
+                <div class="title">Informasi Perusahaan</div>
+                <div class="subtitle">
+                  Data pengirim — biasanya tidak perlu diubah
+                </div>
+              </div>
+              <span class="collapse-arrow">▼</span>
+            </div>
+            <div class="section-body" id="sec-perusahaan" style="display: none">
+              <div
+                style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px"
+              >
+                <div>
+                  <label class="field-label">Nama Perusahaan</label
+                  ><input
+                    name="namaPerusahaan"
+                    value="A2 Trans"
+                    class="field-input"
+                  />
+                </div>
+                <div>
+                  <label class="field-label">Kota Pengirim</label
+                  ><input
+                    name="kotaPengirim"
+                    value="Bogor"
+                    class="field-input"
+                  />
+                </div>
+                <div>
+                  <label class="field-label">Alamat</label
+                  ><input
+                    name="alamat"
+                    value="Jl. Intan 1 No.2, Desa/Kelurahan Cidokom"
+                    class="field-input"
+                  />
+                </div>
+                <div>
+                  <label class="field-label">Kota / Provinsi</label
+                  ><input
+                    name="kotaProvinsi"
+                    value="Kec. Gunung Sindur, Kab.Bogor, Provinsi Jawa Barat"
+                    class="field-input"
+                  />
+                </div>
+                <div>
+                  <label class="field-label">Contact Person</label
+                  ><input
+                    name="contactPerson"
+                    value="0821-2634-168"
+                    class="field-input"
+                  />
+                </div>
+                <div>
+                  <label class="field-label">Email</label
+                  ><input
+                    name="email"
+                    value="a2transbus.official@gmail.com"
+                    class="field-input"
+                  />
+                </div>
+                <div>
+                  <label class="field-label">Nama Penandatangan</label
+                  ><input
+                    name="namaPenandatangan"
+                    value="Darussalam"
+                    class="field-input"
+                  />
+                </div>
+                <div>
+                  <label class="field-label">Jabatan</label
+                  ><input
+                    name="jabatan"
+                    value="Staff A2 Trans"
+                    class="field-input"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ─── 3. INFO SURAT ────────────────────────────────── -->
+          <div class="section-card">
+            <div class="section-head">
+              <div class="icon" style="background: #f0fff4">📋</div>
+              <div>
+                <div class="title">Nomor & Tanggal Surat</div>
+                <div class="subtitle">Otomatis terisi, bisa diedit</div>
+              </div>
+            </div>
+            <div class="section-body">
+              <div
+                style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px"
+              >
+                <div>
+                  <label class="field-label"
+                    >Nomor Surat <span class="req">*</span></label
+                  >
+                  <input
+                    name="nomorSurat"
+                    id="nomorSurat"
+                    required
+                    class="field-input"
+                    placeholder="PENAWARAN/01/12062026"
+                  />
+                </div>
+                <div>
+                  <label class="field-label">Tanggal Surat</label>
+                  <input
+                    name="tanggalSurat"
+                    id="tanggalSurat"
+                    type="date"
+                    class="field-input"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ─── 4. PELANGGAN ─────────────────────────────────── -->
+          <div class="section-card">
+            <div class="section-head">
+              <div class="icon" style="background: #fff5f5">👤</div>
+              <div>
+                <div class="title">Data Pelanggan</div>
+                <div class="subtitle">Ditujukan kepada siapa?</div>
+              </div>
+            </div>
+            <div class="section-body">
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: 120px 1fr 1fr;
+                  gap: 12px;
+                "
+              >
+                <div>
+                  <label class="field-label">Sapaan</label>
+                  <select name="sapaan" class="field-input">
+                    <option value="Bapak">Bapak</option>
+                    <option value="Ibu">Ibu</option>
+                    <option value="Yth.">Yth.</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="field-label"
+                    >Nama Pelanggan <span class="req">*</span></label
+                  >
+                  <input
+                    name="namaPelanggan"
+                    required
+                    class="field-input"
+                    placeholder="cth. Lisa Rahayu"
+                  />
+                </div>
+                <div>
+                  <label class="field-label"
+                    >Instansi <span class="opt">(opsional)</span></label
+                  >
+                  <input
+                    name="instansi"
+                    class="field-input"
+                    placeholder="cth. SD Negeri 1 Bogor"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ─── 5. PERJALANAN ────────────────────────────────── -->
+          <div class="section-card">
+            <div class="section-head">
+              <div class="icon" style="background: #ebf8ff">🚌</div>
+              <div>
+                <div class="title">Detail Perjalanan</div>
+                <div class="subtitle">
+                  Jenis bus, tujuan, dan tanggal keberangkatan
+                </div>
+              </div>
+            </div>
+            <div class="section-body">
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: 1fr 1fr;
+                  gap: 12px;
+                  margin-bottom: 12px;
+                "
+              >
+                <div>
+                  <label class="field-label"
+                    >Jenis / Unit Bus <span class="req">*</span></label
+                  >
+                  <input
+                    name="jenisBus"
+                    required
+                    class="field-input"
+                    placeholder="cth. Big Bus 45 Seat"
+                  />
+                </div>
+                <div>
+                  <label class="field-label"
+                    >Tujuan Wisata <span class="req">*</span></label
+                  >
+                  <input
+                    name="tujuan"
+                    required
+                    class="field-input"
+                    placeholder="cth. Yogyakarta"
+                  />
+                </div>
+              </div>
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: 1fr 1fr 1fr;
+                  gap: 12px;
+                "
+              >
+                <div>
+                  <label class="field-label">Lama Perjalanan</label>
+                  <input
+                    name="lamaPerjalan"
+                    class="field-input"
+                    placeholder="cth. 4 Hari"
+                  />
+                </div>
+                <div>
+                  <label class="field-label">Tanggal Berangkat</label>
+                  <input name="tanggalMulai" type="date" class="field-input" />
+                </div>
+                <div>
+                  <label class="field-label">Tanggal Kembali</label>
+                  <input
+                    name="tanggalSelesai"
+                    type="date"
+                    class="field-input"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ─── 6. ITEMS ─────────────────────────────────────── -->
+          <!-- <div class="section-card">
+            <div class="section-head">
+              <div class="icon" style="background: #faf5ff">💰</div>
+              <div>
+                <div class="title">Rincian Harga</div>
+                <div class="subtitle">Tambah item layanan dan harga</div>
+              </div>
+            </div>
+            <div class="section-body">
+              <table
+                style="width: 100%; border-collapse: collapse"
+                id="itemsTable"
+              >
+                <thead>
+                  <tr style="background: #1e3a5f; color: #fff">
+                    <th
+                      style="
+                        padding: 9px 10px;
+                        text-align: left;
+                        font-size: 11px;
+                        font-weight: 600;
+                        border-radius: 8px 0 0 0;
+                        width: 32px;
+                      "
+                    >
+                      #
+                    </th>
+                    <th
+                      style="
+                        padding: 9px 10px;
+                        text-align: left;
+                        font-size: 11px;
+                        font-weight: 600;
+                      "
+                    >
+                      Keterangan Layanan
+                    </th>
+                    <th
+                      style="
+                        padding: 9px 10px;
+                        text-align: right;
+                        font-size: 11px;
+                        font-weight: 600;
+                        width: 130px;
+                      "
+                    >
+                      Harga Satuan (Rp)
+                    </th>
+                    <th
+                      style="
+                        padding: 9px 10px;
+                        text-align: center;
+                        font-size: 11px;
+                        font-weight: 600;
+                        width: 60px;
+                      "
+                    >
+                      Qty
+                    </th>
+                    <th
+                      style="
+                        padding: 9px 10px;
+                        text-align: right;
+                        font-size: 11px;
+                        font-weight: 600;
+                        border-radius: 0 8px 0 0;
+                        width: 120px;
+                      "
+                    >
+                      Total
+                    </th>
+                    <th
+                      style="
+                        width: 28px;
+                        background: #1e3a5f;
+                        border-radius: 0 8px 0 0;
+                      "
+                    ></th>
+                  </tr>
+                </thead>
+                <tbody id="itemsBody"></tbody>
+                <tfoot>
+                  <tr style="background: #1e3a5f; color: #fff">
+                    <td
+                      colspan="4"
+                      style="
+                        padding: 10px 12px;
+                        text-align: right;
+                        font-size: 13px;
+                        font-weight: 700;
+                        border-radius: 0 0 0 8px;
+                      "
+                    >
+                      Grand Total
+                    </td>
+                    <td
+                      style="
+                        padding: 10px 12px;
+                        text-align: right;
+                        font-size: 13px;
+                        font-weight: 700;
+                      "
+                      id="grandTotalDisplay"
+                    >
+                      Rp 0
+                    </td>
+                    <td
+                      style="border-radius: 0 0 8px 0; background: #1e3a5f"
+                    ></td>
+                  </tr>
+                </tfoot>
+              </table>
+              <button
+                type="button"
+                onclick="addItem()"
+                style="
+                  margin-top: 10px;
+                  font-size: 12px;
+                  font-weight: 600;
+                  color: #1e3a5f;
+                  background: none;
+                  border: none;
+                  cursor: pointer;
+                  display: flex;
+                  align-items: center;
+                  gap: 5px;
+                  padding: 4px 0;
+                "
+              >
+                <span style="font-size: 18px; line-height: 1">＋</span> Tambah
+                Baris
+              </button>
+            </div>
+          </div> -->
+          <div class="section-card">
+            <div class="section-head">
+              <div class="icon" style="background: #faf5ff">💰</div>
+              <div>
+                <div class="title">Rincian Harga</div>
+                <div class="subtitle">Tambah item layanan dan harga</div>
+              </div>
+            </div>
+            <div class="section-body">
+              <table
+                style="width: 100%; border-collapse: collapse"
+                id="itemsTable"
+              >
+                <thead>
+                  <tr style="background: #1e3a5f; color: #fff">
+                    <th
+                      style="
+                        padding: 9px 10px;
+                        text-align: left;
+                        font-size: 11px;
+                        font-weight: 600;
+                        border-radius: 8px 0 0 0;
+                        width: 32px;
+                      "
+                    >
+                      #
+                    </th>
+                    <th
+                      style="
+                        padding: 9px 10px;
+                        text-align: left;
+                        font-size: 11px;
+                        font-weight: 600;
+                      "
+                    >
+                      Keterangan Layanan
+                    </th>
+                    <th
+                      style="
+                        padding: 9px 10px;
+                        text-align: right;
+                        font-size: 11px;
+                        font-weight: 600;
+                        width: 130px;
+                      "
+                    >
+                      Harga Satuan (Rp)
+                    </th>
+                    <th
+                      style="
+                        padding: 9px 10px;
+                        text-align: center;
+                        font-size: 11px;
+                        font-weight: 600;
+                        width: 60px;
+                      "
+                    >
+                      Qty
+                    </th>
+                    <th
+                      style="
+                        padding: 9px 10px;
+                        text-align: right;
+                        font-size: 11px;
+                        font-weight: 600;
+                        width: 120px;
+                      "
+                    >
+                      Total
+                    </th>
+                    <th
+                      style="
+                        width: 28px;
+                        background: #1e3a5f;
+                        border-radius: 0 8px 0 0;
+                      "
+                    ></th>
+                  </tr>
+                </thead>
+                <tbody id="itemsBody"></tbody>
+                <tfoot>
+                  <tr style="background: #1e3a5f; color: #fff">
+                    <td
+                      colspan="4"
+                      style="
+                        padding: 10px 12px;
+                        text-align: right;
+                        font-size: 13px;
+                        font-weight: 700;
+                        border-radius: 0 0 0 8px;
+                      "
+                    >
+                      Grand Total
+                    </td>
+                    <td
+                      style="
+                        padding: 10px 12px;
+                        text-align: right;
+                        font-size: 13px;
+                        font-weight: 700;
+                        width: 120px;
+                        white-space: nowrap;
+                      "
+                      id="grandTotalDisplay"
+                    >
+                      Rp 0
+                    </td>
+                    <td
+                      style="
+                        background: #1e3a5f;
+                        border-radius: 0 0 8px 0;
+                        width: 28px;
+                      "
+                    ></td>
+                  </tr>
+                </tfoot>
+              </table>
+              <button
+                type="button"
+                onclick="addItem()"
+                style="
+                  margin-top: 10px;
+                  font-size: 12px;
+                  font-weight: 600;
+                  color: #1e3a5f;
+                  background: none;
+                  border: none;
+                  cursor: pointer;
+                  display: flex;
+                  align-items: center;
+                  gap: 5px;
+                  padding: 4px 0;
+                "
+              >
+                <span style="font-size: 18px; line-height: 1">＋</span> Tambah
+                Baris
+              </button>
+            </div>
+          </div>
+          <!-- ─── 7. FASILITAS ─────────────────────────────────── -->
+          <div class="section-card">
+            <div class="section-head">
+              <div class="icon" style="background: #f0fff4">✅</div>
+              <div>
+                <div class="title">Fasilitas</div>
+                <div class="subtitle">
+                  Yang sudah & belum termasuk dalam harga
+                </div>
+              </div>
+            </div>
+            <div class="section-body">
+              <div
+                style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px"
+              >
+                <div>
+                  <label class="field-label">✅ Sudah Termasuk</label>
+                  <textarea
+                    name="fasilitasInclude"
+                    rows="3"
+                    class="field-input"
+                    style="resize: none"
+                    placeholder="Bantal & Selimut&#10;Audio & Karaoke&#10;Dispenser"
+                  ></textarea>
+                  <p class="hint">Pisahkan dengan koma atau enter</p>
+                </div>
+                <div>
+                  <label class="field-label">❌ Belum Termasuk</label>
+                  <textarea
+                    name="fasilitasExclude"
+                    rows="3"
+                    class="field-input"
+                    style="resize: none"
+                    placeholder="Biaya Toll&#10;Tips Supir & Helper&#10;Biaya Makan Kru"
+                  ></textarea>
+                  <p class="hint">Pisahkan dengan koma atau enter</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ─── 8. CATATAN ───────────────────────────────────── -->
+          <div class="section-card">
+            <div class="section-head">
+              <div class="icon" style="background: #fffbeb">📝</div>
+              <div>
+                <div class="title">
+                  Catatan Tambahan
+                  <span
+                    style="font-weight: 400; color: #a0aec0; font-size: 12px"
+                    >(opsional)</span
+                  >
+                </div>
+                <div class="subtitle">Muncul di bagian bawah surat</div>
+              </div>
+            </div>
+            <div class="section-body">
+              <textarea
+                name="catatan"
+                rows="2"
+                class="field-input"
+                style="resize: none"
+                placeholder="cth. Harga berlaku 7 hari sejak surat ini diterbitkan."
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- ─── ACTIONS ──────────────────────────────────────── -->
+          <div
+            style="
+              display: flex;
+              justify-content: flex-end;
+              gap: 10px;
+              margin-top: 4px;
+            "
+          >
+            <button
+              type="button"
+              onclick="resetForm()"
+              style="
+                padding: 10px 20px;
+                font-size: 13px;
+                font-weight: 600;
+                border-radius: 9px;
+                border: 1.5px solid #e2e8f0;
+                background: #fff;
+                color: #4a5568;
+                cursor: pointer;
+                transition: background 0.15s;
+              "
+              onmouseover="this.style.background = '#f7fafc'"
+              onmouseout="this.style.background = '#fff'"
+            >
+              🔄 Reset Form
+            </button>
+            <button
+              type="submit"
+              id="submitBtn"
+              style="
+                padding: 10px 28px;
+                font-size: 13px;
+                font-weight: 700;
+                border-radius: 9px;
+                border: none;
+                background: #1e3a5f;
+                color: #fff;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                box-shadow: 0 2px 8px rgba(30, 58, 95, 0.3);
+                transition: background 0.15s;
+              "
+              onmouseover="this.style.background = '#2e5481'"
+              onmouseout="this.style.background = '#1e3a5f'"
+            >
+              <span id="submitIcon">📥</span>
+              <span id="submitText">Generate PDF</span>
+            </button>
+          </div>
+        </form>
+      </div>
+      <!-- /panel-form -->
+
+      <!-- ══════════════════ TAB HISTORY ══════════════════ -->
+      <div id="panel-history" style="display: none">
+        <div class="section-card">
+          <div class="section-head">
+            <div class="icon" style="background: #ebf4ff">🕘</div>
+            <div>
+              <div class="title">History Penawaran</div>
+              <div class="subtitle">50 penawaran terakhir</div>
+            </div>
+          </div>
+          <div style="padding: 0 18px 18px" id="historyContent">
+            <p
+              style="
+                text-align: center;
+                color: #a0aec0;
+                padding: 32px 0;
+                font-size: 13px;
+              "
+            >
+              Memuat...
+            </p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- TOAST -->
+    <div
+      id="toast"
+      style="
+        display: none;
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 50;
+        padding: 12px 20px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #fff;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s;
+      "
+    ></div>
+
+    <script>
+      // ─── State ───────────────────────────────────────────────────────────────────
+      let items = [];
+
+      // ─── Init ────────────────────────────────────────────────────────────────────
+      document.addEventListener("DOMContentLoaded", () => {
+        const today = new Date().toISOString().split("T")[0];
+        document.getElementById("tanggalSurat").value = today;
+        const dd = today.replace(/-/g, "");
+        document.getElementById("nomorSurat").value =
+          `PENAWARAN/01/${dd.slice(6)}${dd.slice(4, 6)}${dd.slice(2, 4)}`;
+        addItem();
+      });
+
+      // ─── Logo preview ─────────────────────────────────────────────────────────────
+      function previewLogo(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const b64 = ev.target.result;
+          document.getElementById("logoPreview").src = b64;
+          document.getElementById("logoPreview").style.display = "block";
+          document.getElementById("logoBase64").value = b64;
+          document.getElementById("logoFileName").textContent = file.name;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      // ─── Collapse sections ────────────────────────────────────────────────────────
+      function toggleSection(bodyId, cardId) {
+        const body = document.getElementById(bodyId);
+        const card = cardId ? document.getElementById(cardId) : null;
+        const visible = body.style.display !== "none";
+        body.style.display = visible ? "none" : "";
+        if (card) card.classList.toggle("collapsed", !visible);
+      }
+
+      // ─── Items ────────────────────────────────────────────────────────────────────
+      function addItem() {
+        if (items.length >= 8) return;
+        items.push({ id: Date.now(), keterangan: "", harga: 0, qty: 1 });
+        renderItems();
+      }
+
+      function removeItem(id) {
+        if (items.length <= 1) return;
+        items = items.filter((i) => i.id !== id);
+        renderItems();
+      }
+
+      function renderItems() {
+        const tbody = document.getElementById("itemsBody");
+        tbody.innerHTML = items
+          .map(
+            (item, idx) => `
+    <tr style="background:${idx % 2 === 0 ? "#fff" : "#f8fafc"};">
+      <td style="padding:6px 10px;text-align:center;font-size:12px;color:#a0aec0;border-bottom:1px solid #f0f4f8;">${idx + 1}</td>
+      <td style="padding:5px 6px;border-bottom:1px solid #f0f4f8;">
+        <input class="item-input" type="text" placeholder="cth. 1 Unit Big Bus 45 Seat tujuan Yogyakarta 4 Hari"
+          value="${escHtml(item.keterangan)}"
+          oninput="updateItem(${item.id},'keterangan',this.value)"/>
+      </td>
+      <td style="padding:5px 6px;border-bottom:1px solid #f0f4f8;">
+        <input class="item-input" type="number" min="0" placeholder="0" style="text-align:right;"
+          value="${item.harga || ""}"
+          oninput="updateItem(${item.id},'harga',+this.value)"/>
+      </td>
+      <td style="padding:5px 6px;border-bottom:1px solid #f0f4f8;">
+        <input class="item-input" type="number" min="1" max="99" style="text-align:center;width:52px;"
+          value="${item.qty}"
+          oninput="updateItem(${item.id},'qty',+this.value||1)"/>
+      </td>
+      <td style="padding:6px 10px;text-align:right;font-size:13px;font-weight:500;border-bottom:1px solid #f0f4f8;white-space:nowrap;">
+        ${formatRp((item.harga || 0) * (item.qty || 1))}
+      </td>
+      <td style="padding:4px 6px;border-bottom:1px solid #f0f4f8;text-align:center;">
+        ${items.length > 1 ? `<button type="button" onclick="removeItem(${item.id})" style="color:#cbd5e0;background:none;border:none;cursor:pointer;font-size:18px;line-height:1;padding:0 2px;" onmouseover="this.style.color='#fc8181'" onmouseout="this.style.color='#cbd5e0'">×</button>` : ""}
+      </td>
+    </tr>`,
+          )
+          .join("");
+        updateGrandTotal();
+      }
+
+      function updateItem(id, field, value) {
+        const item = items.find((i) => i.id === id);
+        if (item) {
+          item[field] = value;
+          // updateGrandTotal();
+          // update total per baris langsung tanpa re-render
+          const total = (item.harga || 0) * (item.qty || 1);
+          const row = document.querySelector(`[data-id="${id}"]`);
+          if (row)
+            row.querySelector(".item-total").textContent = formatRp(total);
+          updateGrandTotal();
+        }
+      }
+
+      function updateGrandTotal() {
+        const total = items.reduce(
+          (s, i) => s + (i.harga || 0) * (i.qty || 1),
+          0,
+        );
+        document.getElementById("grandTotalDisplay").textContent =
+          formatRp(total);
+      }
+
+      // ─── Submit ───────────────────────────────────────────────────────────────────
+      async function submitForm(e) {
+        e.preventDefault();
+        const form = e.target;
+        let ok = true;
+        form.querySelectorAll("[required]").forEach((el) => {
+          const empty = !el.value.trim();
+          el.classList.toggle("error", empty);
+          if (empty) ok = false;
+        });
+        if (!ok) {
+          toast("Harap isi field yang wajib diisi (*)", "error");
+          return;
+        }
+
+        const data = Object.fromEntries(new FormData(form).entries());
+        console.log("namaPelanggan:", data.namaPelanggan);
+        console.log("tanggalSurat:", data.tanggalSurat);
+        data.items = items.filter((i) => i.keterangan.trim());
+        data.items = items.filter((i) => i.keterangan.trim());
+        console.log("items:", data.items);
+        const btn = document.getElementById("submitBtn");
+        btn.disabled = true;
+        document.getElementById("submitIcon").textContent = "⏳";
+        document.getElementById("submitText").textContent = "Generating...";
+
+        try {
+          const response = await fetch("/api/pdf", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
+          if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.error || "Server error");
+          }
+          const blob = await response.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          // a.download = `Penawaran_${(data.nomorSurat||'').replace(/\//g,'-')}.pdf`;
+          a.download = `Surat Penawaran_${data.sapaan} ${data.namaPelanggan}_${data.tanggalSurat}.pdf`;
+          a.click();
+          // URL.revokeObjectURL(url);
+          toast("PDF berhasil di-download! ✅", "success");
+        } catch (err) {
+          toast("Gagal: " + err.message, "error");
+        } finally {
+          btn.disabled = false;
+          document.getElementById("submitIcon").textContent = "📥";
+          document.getElementById("submitText").textContent = "Generate PDF";
+        }
+      }
+      function resetForm() {
+        document.getElementById("mainForm").reset();
+        items = [];
+        addItem();
+        const today = new Date().toISOString().split("T")[0];
+        document.getElementById("tanggalSurat").value = today;
+        document.getElementById("logoPreview").style.display = "none";
+        document.getElementById("logoBase64").value = "";
+        document.getElementById("logoFileName").textContent = "";
+        toast("Form berhasil direset", "info");
+      }
+
+      // ─── Tabs ─────────────────────────────────────────────────────────────────────
+      function showTab(tab) {
+        document.getElementById("panel-form").style.display =
+          tab === "form" ? "" : "none";
+        document.getElementById("panel-history").style.display =
+          tab === "history" ? "" : "none";
+        document.getElementById("tab-form").className =
+          "tab-btn " + (tab === "form" ? "tab-active" : "tab-inactive");
+        document.getElementById("tab-history").className =
+          "tab-btn " + (tab === "history" ? "tab-active" : "tab-inactive");
+        if (tab === "history") loadHistory();
+      }
+
+      // ─── History ──────────────────────────────────────────────────────────────────
+      async function loadHistory() {
+        const el = document.getElementById("historyContent");
+        el.innerHTML =
+          '<p style="text-align:center;color:#a0aec0;padding:24px;font-size:13px;">Memuat...</p>';
+        try {
+          const histres = await fetch("/api/history");
+          const json = await histres.json();
+          if (json.note) {
+            el.innerHTML = `<div style="text-align:center;padding:32px 0;color:#a0aec0;">
+        <div style="font-size:32px;margin-bottom:8px;">☁️</div>
+        <div style="font-size:13px;">${json.note}</div>
+        <div style="font-size:11px;margin-top:6px;">Isi <code style="background:#f0f4f8;padding:2px 5px;border-radius:4px;">.env</code> dengan kredensial Supabase untuk mengaktifkan history.</div>
+      </div>`;
+            return;
+          }
+          if (!json.data?.length) {
+            el.innerHTML =
+              '<p style="text-align:center;color:#a0aec0;padding:32px 0;font-size:13px;">Belum ada history penawaran.</p>';
+            return;
+          }
+          el.innerHTML = `
+<div style="overflow-x:auto;">
+<table style="width:100%;min-width:800px;border-collapse:collapse;font-size:12px;">
+  <thead><tr style="background:#1e3a5f;color:#fff;">
+    <th style="padding:8px 10px;text-align:left;border-radius:8px 0 0 0;white-space:nowrap;">Nomor Surat</th>
+    <th style="padding:8px 10px;text-align:left;white-space:nowrap;">Sapaan</th>
+    <th style="padding:8px 10px;text-align:left;white-space:nowrap;">Pelanggan</th>
+    <th style="padding:8px 10px;text-align:left;white-space:nowrap;">Tujuan</th>
+    <th style="padding:8px 10px;text-align:right;white-space:nowrap;">Qty</th>
+    <th style="padding:8px 10px;text-align:right;white-space:nowrap;">Harga</th>
+    <th style="padding:8px 10px;text-align:right;white-space:nowrap;">Grand Total</th>
+    <th style="padding:8px 10px;text-align:center;border-radius:0 8px 0 0;white-space:nowrap;">Aksi</th>
+  </tr></thead>
+  <tbody>${json.data
+    .map(
+      (row, i) => `
+    <tr style="background:${i % 2 === 0 ? "#fff" : "#f8fafc"};">
+      <td style="padding:8px 10px;border-bottom:1px solid #f0f4f8;font-family:monospace;font-size:11px;white-space:nowrap;">${row.nomor_surat}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #f0f4f8;white-space:nowrap;">${row.sapaan_nama || "-"}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #f0f4f8;white-space:nowrap;">${row.nama_pelanggan}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #f0f4f8;white-space:nowrap;">${row.tujuan}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #f0f4f8;text-align:right;white-space:nowrap;">${row.qty_total || "-"}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #f0f4f8;text-align:right;white-space:nowrap;">${formatRp(row.harga_total)}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #f0f4f8;text-align:right;font-weight:600;white-space:nowrap;">${formatRp(row.grand_total)}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #f0f4f8;text-align:center;white-space:nowrap;">
+        <button onclick="downloadHistory('${row.id}')" style="font-size:11px;font-weight:600;color:#1e3a5f;background:#e8edf3;border:none;cursor:pointer;padding:4px 10px;border-radius:5px;margin-right:4px;" onmouseover="this.style.background='#d7e2ee'" onmouseout="this.style.background='#e8edf3'">↓ Download</button>
+        <button onclick="deleteHistory('${row.id}')" style="font-size:11px;font-weight:600;color:#fc8181;background:none;border:none;cursor:pointer;padding:3px 8px;border-radius:5px;" onmouseover="this.style.background='#fff5f5'" onmouseout="this.style.background='transparent'">Hapus</button>
+      </td>
+    </tr>`,
+    )
+    .join("")}
+  </tbody>
+</table>
+</div>`;
+        } catch (err) {
+          el.innerHTML = `<p style="color:#fc8181;font-size:13px;">Error: ${err.message}</p>`;
+        }
+      }
+
+      async function deleteHistory(id) {
+        if (!confirm("Hapus history ini?")) return;
+        await fetch(`/api/history/${id}`, { method: "DELETE" });
+        loadHistory();
+      }
+      async function downloadHistory(id) {
+        try {
+          const response = await fetch(`/api/history/${id}/download`, {
+            method: "POST",
+          });
+          if (!response.ok) {
+            const e = await response.json();
+            throw new Error(e.error);
+          }
+          const blob = await response.blob();
+          const filename =
+            response.headers.get("X-Filename") || "Surat_Penawaran.pdf";
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = filename;
+          a.click();
+          URL.revokeObjectURL(url);
+          toast("PDF berhasil di-download! ✅", "success");
+        } catch (err) {
+          toast("Gagal: " + err.message, "error");
+        }
+      }
+
+      // ─── Helpers ──────────────────────────────────────────────────────────────────
+      function formatRp(num) {
+        return "Rp " + Number(num || 0).toLocaleString("id-ID");
+      }
+      function escHtml(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+      // function toast(msg, type = "info") {
+      //   const el = document.getElementById("toast");
+      //   const bg = { success: "#38a169", error: "#e53e3e", info: "#2d3748" };
+      //   el.style.cssText = `display:block;position:fixed;bottom:24px;right:24px;z-index:50;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:600;color:#fff;box-shadow:0 4px 20px rgba(0,0,0,.2);background:${bg[type] || bg.info}`;
+      //   el.textContent = msg;
+      //   setTimeout(() => (el.style.display = "none"), 3500);
+      // }
+      function toast(msg, type) {
+        type = type || "info";
+        const el = document.getElementById("toast");
+        const bg = { success: "#38a169", error: "#e53e3e", info: "#2d3748" };
+        const color = bg[type] || bg["info"];
+        el.style.cssText =
+          "display:block;position:fixed;bottom:24px;right:24px;z-index:50;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:600;color:#fff;box-shadow:0 4px 20px rgba(0,0,0,.2);background:" +
+          color;
+        el.textContent = msg;
+        setTimeout(function () {
+          el.style.display = "none";
+        }, 3500);
+      }
+    </script>
+  </body>
+</html>
