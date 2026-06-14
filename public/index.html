@@ -1060,6 +1060,15 @@
       let items = [];
 
       // ─── Init ────────────────────────────────────────────────────────────────────
+      // document.addEventListener("DOMContentLoaded", () => {
+      //   const today = new Date().toISOString().split("T")[0];
+      //   document.getElementById("tanggalSurat").value = today;
+      //   const dd = today.replace(/-/g, "");
+      //   document.getElementById("nomorSurat").value =
+      //     `PENAWARAN/01/${dd.slice(6)}${dd.slice(4, 6)}${dd.slice(2, 4)}`;
+      //   addItem();
+      // });
+      // ─── Init ────────────────────────────────────────────────────────────────────
       document.addEventListener("DOMContentLoaded", () => {
         const today = new Date().toISOString().split("T")[0];
         document.getElementById("tanggalSurat").value = today;
@@ -1067,6 +1076,21 @@
         document.getElementById("nomorSurat").value =
           `PENAWARAN/01/${dd.slice(6)}${dd.slice(4, 6)}${dd.slice(2, 4)}`;
         addItem();
+
+        document
+          .getElementById("tanggalSurat")
+          .addEventListener("change", function () {
+            const val = this.value;
+            if (!val) return;
+            const dd = val.replace(/-/g, "");
+            const formatted = `${dd.slice(6)}${dd.slice(4, 6)}${dd.slice(2, 4)}`;
+            const nomorInput = document.getElementById("nomorSurat");
+            const parts = nomorInput.value.split("/");
+            if (parts.length === 3) {
+              parts[2] = formatted;
+              nomorInput.value = parts.join("/");
+            }
+          });
       });
 
       // ─── Logo preview ─────────────────────────────────────────────────────────────
