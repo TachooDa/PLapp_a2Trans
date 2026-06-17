@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>A2 Trans — Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: Inter, Arial, sans-serif;
+      }
+    </style>
+  </head>
+  <body
+    style="
+      background: #f0f4f8;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    "
+  >
+    <div
+      style="
+        background: #fff;
+        border-radius: 16px;
+        padding: 36px 32px;
+        width: 100%;
+        max-width: 380px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+      "
+    >
+      <!-- Logo/Header -->
+      <div style="text-align: center; margin-bottom: 28px">
+        <div
+          style="
+            width: 52px;
+            height: 52px;
+            background: #1e3a5f;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 18px;
+            color: #c8a84b;
+            margin: 0 auto 12px;
+          "
+        >
+          A2
+        </div>
+        <div style="font-size: 18px; font-weight: 700; color: #1e3a5f">
+          A2 Trans
+        </div>
+        <div style="font-size: 12px; color: #a0aec0; margin-top: 2px">
+          Generator Surat Penawaran
+        </div>
+      </div>
+
+      <!-- Error message -->
+      <div
+        id="errorMsg"
+        style="
+          display: none;
+          background: #fff5f5;
+          border: 1px solid #feb2b2;
+          color: #c53030;
+          padding: 10px 14px;
+          border-radius: 8px;
+          font-size: 13px;
+          margin-bottom: 16px;
+        "
+      ></div>
+
+      <!-- Form -->
+      <div style="margin-bottom: 16px">
+        <label
+          style="
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 5px;
+          "
+          >Email</label
+        >
+        <input
+          id="email"
+          type="email"
+          placeholder="admin@a2trans.com"
+          style="
+            width: 100%;
+            border-radius: 8px;
+            border: 1.5px solid #e2e8f0;
+            padding: 10px 12px;
+            font-size: 14px;
+            outline: none;
+          "
+          onfocus="this.style.borderColor = '#1e3a5f'"
+          onblur="this.style.borderColor = '#e2e8f0'"
+        />
+      </div>
+
+      <div style="margin-bottom: 24px">
+        <label
+          style="
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 5px;
+          "
+          >Password</label
+        >
+        <div style="position: relative">
+          <input
+            id="password"
+            type="password"
+            placeholder="••••••••"
+            style="
+              width: 100%;
+              border-radius: 8px;
+              border: 1.5px solid #e2e8f0;
+              padding: 10px 40px 10px 12px;
+              font-size: 14px;
+              outline: none;
+            "
+            onfocus="this.style.borderColor = '#1e3a5f'"
+            onblur="this.style.borderColor = '#e2e8f0'"
+            onkeydown="if (event.key === 'Enter') doLogin();"
+          />
+          <button
+            type="button"
+            onclick="togglePassword()"
+            style="
+              position: absolute;
+              right: 10px;
+              top: 50%;
+              transform: translateY(-50%);
+              background: none;
+              border: none;
+              cursor: pointer;
+              color: #a0aec0;
+              font-size: 16px;
+            "
+            id="toggleBtn"
+          >
+            👁️
+          </button>
+        </div>
+      </div>
+
+      <button
+        onclick="doLogin()"
+        id="loginBtn"
+        style="
+          width: 100%;
+          padding: 11px;
+          background: #1e3a5f;
+          color: #fff;
+          border: none;
+          border-radius: 9px;
+          font-size: 14px;
+          font-weight: 700;
+          cursor: pointer;
+        "
+      >
+        Masuk
+      </button>
+    </div>
+
+    <script>
+      function togglePassword() {
+        const input = document.getElementById("password");
+        const btn = document.getElementById("toggleBtn");
+        if (input.type === "password") {
+          input.type = "text";
+          btn.textContent = "🙈";
+        } else {
+          input.type = "password";
+          btn.textContent = "👁️";
+        }
+      }
+      // kalau sudah login, redirect langsung ke app
+      if (localStorage.getItem("sb_token")) {
+        window.location.href = "/app";
+      }
+
+      async function doLogin() {
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+        const btn = document.getElementById("loginBtn");
+        const errEl = document.getElementById("errorMsg");
+
+        if (!email || !password) {
+          showError("Email dan password wajib diisi.");
+          return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = "Memproses...";
+        errEl.style.display = "none";
+
+        try {
+          const res = await fetch("/api/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
+          });
+          const json = await res.json();
+          if (!res.ok) throw new Error(json.error);
+
+          localStorage.setItem("sb_token", json.token);
+          localStorage.setItem("just_logged_in", "1");
+          window.location.href = "/app";
+        } catch (err) {
+          showError(err.message);
+          btn.disabled = false;
+          btn.textContent = "Masuk";
+        }
+      }
+
+      function showError(msg) {
+        const el = document.getElementById("errorMsg");
+        el.textContent = msg;
+        el.style.display = "block";
+      }
+    </script>
+  </body>
+</html>

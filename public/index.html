@@ -259,6 +259,21 @@
           >
             🕘 History
           </button>
+          <button
+            onclick="doLogout()"
+            style="
+              padding: 7px 14px;
+              font-size: 12px;
+              font-weight: 600;
+              border-radius: 8px;
+              border: none;
+              background: rgba(255, 255, 255, 0.15);
+              color: #fff;
+              cursor: pointer;
+            "
+          >
+            Keluar
+          </button>
         </div>
       </div>
     </header>
@@ -1056,18 +1071,44 @@
     ></div>
 
     <script>
+      // ─── Auth check ───────────────────────────────────────────────────────────────
+      const TOKEN = localStorage.getItem("sb_token");
+      if (!TOKEN) window.location.href = "/";
+
+      // welcome toast kalau baru login
+      // if (localStorage.getItem("just_logged_in")) {
+      //   localStorage.removeItem("just_logged_in");
+      //   setTimeout(() => {
+      //     const modal = document.getElementById("welcomeModal");
+      //     modal.style.display = "flex";
+      //     setTimeout(() => (modal.style.display = "none"), 1800);
+      //   }, 200);
+      // }
+
+      // tambah token ke semua fetch
+      const _fetch = window.fetch;
+      window.fetch = function (url, opts = {}) {
+        if (url.startsWith("/api/")) {
+          opts.headers = { ...opts.headers, Authorization: `Bearer ${TOKEN}` };
+        }
+        return _fetch(url, opts);
+      };
+      // LOGOUT
+      function doLogout() {
+        if (!confirm("Yakin mau keluar?")) return;
+
+        const modal = document.getElementById("logoutModal");
+        modal.style.display = "flex";
+
+        setTimeout(() => {
+          localStorage.removeItem("sb_token");
+          window.location.href = "/";
+        }, 1500);
+      }
+
       // ─── State ───────────────────────────────────────────────────────────────────
       let items = [];
 
-      // ─── Init ────────────────────────────────────────────────────────────────────
-      // document.addEventListener("DOMContentLoaded", () => {
-      //   const today = new Date().toISOString().split("T")[0];
-      //   document.getElementById("tanggalSurat").value = today;
-      //   const dd = today.replace(/-/g, "");
-      //   document.getElementById("nomorSurat").value =
-      //     `PENAWARAN/01/${dd.slice(6)}${dd.slice(4, 6)}${dd.slice(2, 4)}`;
-      //   addItem();
-      // });
       // ─── Init ────────────────────────────────────────────────────────────────────
       document.addEventListener("DOMContentLoaded", () => {
         const today = new Date().toISOString().split("T")[0];
@@ -1091,6 +1132,13 @@
               nomorInput.value = parts.join("/");
             }
           });
+        // ← pindahkan welcome modal ke sini
+        if (localStorage.getItem("just_logged_in")) {
+          localStorage.removeItem("just_logged_in");
+          const modal = document.getElementById("welcomeModal");
+          modal.style.display = "flex";
+          setTimeout(() => (modal.style.display = "none"), 1800);
+        }
       });
 
       // ─── Logo preview ─────────────────────────────────────────────────────────────
@@ -1386,5 +1434,84 @@
         }, 3500);
       }
     </script>
+
+    <!-- WELCOME MODAL -->
+    <div
+      id="welcomeModal"
+      style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 60;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <div
+        style="
+          background: #fff;
+          border-radius: 16px;
+          padding: 32px 40px;
+          text-align: center;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+          animation: popIn 0.3s ease;
+        "
+      >
+        <div style="font-size: 40px; margin-bottom: 12px">👋</div>
+        <div style="font-size: 16px; font-weight: 700; color: #1e3a5f">
+          Selamat Datang!
+        </div>
+        <div style="font-size: 13px; color: #a0aec0; margin-top: 4px">
+          Berhasil masuk ke A2 Trans
+        </div>
+      </div>
+    </div>
+
+    <!-- LOGOUT MODAL -->
+    <div
+      id="logoutModal"
+      style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 60;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <div
+        style="
+          background: #fff;
+          border-radius: 16px;
+          padding: 32px 40px;
+          text-align: center;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+          animation: popIn 0.3s ease;
+        "
+      >
+        <div style="font-size: 40px; margin-bottom: 12px">👋</div>
+        <div style="font-size: 16px; font-weight: 700; color: #1e3a5f">
+          Sampai Jumpa!
+        </div>
+        <div style="font-size: 13px; color: #a0aec0; margin-top: 4px">
+          Berhasil keluar dari aplikasi
+        </div>
+      </div>
+    </div>
+
+    <style>
+      @keyframes popIn {
+        from {
+          opacity: 0;
+          transform: scale(0.9);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+    </style>
   </body>
 </html>
